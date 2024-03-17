@@ -9,100 +9,86 @@
 // which is invoked once for any initial cell in the area.
 
 
-let cols, rows; // variables to store number of columns and rows in the grid 
-const size = 50; // size of each cell in the grid 
-var grid = []; // an array to hold the cells of the grid 
+let cols, rows; // Variables to store the number of columns and rows in the grid 
+const size = 50; // Size of each cell in the grid 
+var grid = []; // Array to hold the cells of the grid 
+var current; // Current cell being visited
+var stack = []; // Stack for backtracking during maze generation
 
-var current; // keep track of the visited cell in the grid 
-var stack = []; 
-
+// Function to calculate the index of a cell in the grid array
 function index(column, row) {
-    if (column < 0 || row < 0 || column > cols - 1 || row > rows - 1){ // edge cases 
+    // Check if the column or row is out of bounds
+    if (column < 0 || row < 0 || column > cols - 1 || row > rows - 1) {
         return -1;
     }
-
-    return column + row * cols; 
+    // Return the calculated index
+    return column + row * cols;
 }
-
+// Cell class representing each cell in the grid
 class Cell {
     constructor(i, j) {
-        this.i = i; // i is the column number 
-        this.j = j; // j is the row number
-        this.walls = [true, true, true, true]; // each side of the wall
+        // Column number of the cell
+        this.i = i;
+        // Row number of the cell
+        this.j = j;
+        // Array representing walls on each side of the cell
+        this.walls = [true, true, true, true];
+        // Flag to mark if the cell has been visited
+        this.visited = false;
     }
 
+    // Method to display the cell on the canvas
     show() {
-        var x = this.i * size; // x position of the cell
-        var y = this.j * size; // y position of the cell
-        stroke(255); // color of the cell = white 
+        // Calculate the position of the cell on the canvas
+        var x = this.i * size;
+        var y = this.j * size;
+        stroke(255); // Set color of cell to white
 
+        // Draw walls of the cell
+        if (this.walls[0]) line(x, y, x + size, y); // Top wall
+        if (this.walls[1]) line(x + size, y, x + size, y + size); // Right wall
+        if (this.walls[2]) line(x + size, y + size, x, y + size); // Bottom wall
+        if (this.walls[3]) line(x, y + size, x, y); // Left wall
 
-        // walls of every grid box 
-        if (this.walls[0]) { // top wall 
-            line(x,        y,        x + size, y);
-        }
-        if (this.walls[1]) { // right wall 
-            line(x + size, y,        x + size, y + size);
-        }
-        if (this.walls[2]) { // bottom wall 
-            line(x + size, y + size, x,        y + size);
-        }
-        if (this.walls[3]) { // left wall 
-            line(x,        y + size, x,        y);
-        }
-
+        // If cell has been visited, fill it with a semi-transparent color
         if (this.visited) {
-            // change the color of the visited node 
             noStroke();
             fill(255, 0, 255, 100);
-            rect(x, y, size, size); 
+            rect(x, y, size, size);
         }
     }
 
+    // Method to check neighboring cells and return unvisited neighbors
     checkNeighbours() {
         var neighbours = [];
-        
-        // i is the column number, j is the row number 
-        var top = grid[index(this.i, this.j - 1)];    // top neighbour 
-        var right = grid[index(this.i + 1, this.j)];  // right neighbour
-        var bottom = grid[index(this.i, this.j + 1)]; // bottom neighbour  
-        var left = grid[index(this.i - 1, this.j)];   // left neighbour 
 
-        if (top && !top.visited) {
-            neighbours.push(top);
-        }
-        if (right && !right.visited) {
-            neighbours.push(right);
-        }
-        if (bottom && !bottom.visited) {
-            neighbours.push(bottom);
-        }
-        if (left && !left.visited) {
-            neighbours.push(left);
-        }
+        // Get neighboring cells
+        var top = grid[index(this.i, this.j - 1)];    // Top neighbor
+        var right = grid[index(this.i + 1, this.j)];  // Right neighbor
+        var bottom = grid[index(this.i, this.j + 1)]; // Bottom neighbor
+        var left = grid[index(this.i - 1, this.j)];   // Left neighbor
 
-        if (neighbours.length > 0) {
-            var randomNeighbour = floor(random(0, neighbours.length))
-            return neighbours[randomNeighbour];
-        }
-        else {
-            return undefined; 
-        }
+        // Add unvisited neighbors to the list
+        if (top && !top.visited) neighbours.push(top);
+        if (right && !right.visited) neighbours.push(right);
+        if (bottom && !bottom.visited) neighbours.push(bottom);
+        if (left && !left.visited) neighbours.push(left);
+
+        // Return list of unvisited neighbors
+        return neighbours.length > 0 ? neighbours[floor(random(0, neighbours.length))] : undefined;
     }
-
-
-
 }
 
+// Function to remove wall between current cell and neighboring cell
 function removeWall(current, neighbour) {
-    // the differences between the row and columns of the neighbour and the current cell 
+    // Calculate the difference between the row and column indices of the neighboring cell and the current cell
     var x = current.i - neighbour.i;
 
-    if (x === 1){
+    // Remove wall between current cell and neighboring cell based on their relative positions
+    if (x === 1) {
         current.walls[3] = false;
         neighbour.walls[1] = false;
-    }
-    else if (x === -1) {
+    } else if (x === -1) {
         current.walls[1] = false;
         neighbour.walls[3] = false;
     }
@@ -111,47 +97,60 @@ function removeWall(current, neighbour) {
     if (y === 1) {
         current.walls[0] = false;
         neighbour.walls[2] = false;
-    }
-    else if (y === -1) {
+    } else if (y === -1) {
         current.walls[2] = false;
         neighbour.walls[0] = false;
     }
 }
 
 
-// sets up the canvas and initialization of the cells 
+// Setup function to initialize the canvas and grid
 function setup() {
     createCanvas(1000, 800);
     cols = floor(width / size);
     rows = floor(height / size);
 
+    // Create cells and add them to the grid
     for (var row = 0; row < rows; row++) {
-        for (var column = 0; column < cols; column++){
-            var cell = new Cell(column, row); // each cell of the grid is the class Cell 
+        for (var column = 0; column < cols; column++) {
+            var cell = new Cell(column, row);
             grid.push(cell);
         }
     }
 
-    current = grid[0]; 
+    // Start maze generation from the first cell
+    current = grid[0];
 }
 
+// Draw function to continuously update and display the grid
 function draw() {
     background(40);
+
+    // Display each cell in the grid
     for (var i = 0; i < grid.length; i++) {
         grid[i].show();
     }
 
-    current.visited = true; 
+    // Mark current cell as visited
+    current.visited = true;
 
+    // Get a random unvisited neighbor of the current cell
     var next = current.checkNeighbours();
 
+    // If a valid neighbor is found
     if (next) {
+        // Mark neighbor as visited
         next.visited = true;
+        // Add current cell to the stack
         stack.push(current);
-        removeWall(current, next)
-        current = next; 
+        // Remove wall between current cell and neighbor
+        removeWall(current, next);
+        // Move to the neighbor
+        current = next;
     }
-    else if (stack.length > 0) { 
+    // If no valid neighbor is found and there are cells in the stack
+    else if (stack.length > 0) {
+        // Pop a cell from the stack and make it the current cell
         current = stack.pop();
     }
 }
