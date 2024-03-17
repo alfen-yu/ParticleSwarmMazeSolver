@@ -15,6 +15,8 @@ var grid = []; // Array to hold the cells of the grid
 var current; // Current cell being visited
 var stack = []; // Stack for backtracking during maze generation
 
+let particles = []; // particles array
+
 // Function to calculate the index of a cell in the grid array
 function index(column, row) {
     // Check if the column or row is out of bounds
@@ -110,6 +112,8 @@ function setup() {
     cols = floor(width / size);
     rows = floor(height / size);
 
+    frameRate(120);
+
     // Create cells and add them to the grid
     for (var row = 0; row < rows; row++) {
         for (var column = 0; column < cols; column++) {
@@ -120,6 +124,9 @@ function setup() {
 
     // Start maze generation from the first cell
     current = grid[0];
+
+    particle = new Particle(grid[0].i * size + size / 2, grid[0].j * size + size / 2);
+
 }
 
 // Draw function to continuously update and display the grid
@@ -152,5 +159,20 @@ function draw() {
     else if (stack.length > 0) {
         // Pop a cell from the stack and make it the current cell
         current = stack.pop();
+    }
+
+    particle.show();
+}
+
+class Particle {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y; 
+    }
+
+    show() {
+        stroke(0);
+        fill(0, 255, 0);
+        ellipse(this.x, this.y, 10);
     }
 }
