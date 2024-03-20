@@ -1,5 +1,4 @@
 // The depth-first search algorithm of maze generation is frequently implemented using backtracking. This can be described with a following recursive routine:
-
 // Given a current cell as a parameter
 // Mark the current cell as visited
 // While the current cell has any unvisited neighbour cells
@@ -9,13 +8,14 @@
 // which is invoked once for any initial cell in the area.
 
 
-let cols, rows; // Variables to store the number of columns and rows in the grid 
+let cols, rows; 
 const size = 50; // Size of each cell in the grid 
 var grid = []; // Array to hold the cells of the grid 
-var current; // Current cell being visited
-var stack = []; // Stack for backtracking during maze generation
-
-let particles = []; // particles array
+let current; // Current cell 
+let last; // Last cell
+const stack = []; // Stack for backtracking during maze generation
+const particles = []; // particles array
+const noOfParticles = 1000; 
 
 // Function to calculate the index of a cell in the grid array
 function index(column, row) {
@@ -53,11 +53,12 @@ class Cell {
         if (this.walls[3]) line(x, y + size, x, y); // Left wall
 
         // If cell has been visited, fill it with a semi-transparent color
-        if (this.visited) {
+        if (this.visited && this !== last && this !== grid[0]) {
             noStroke();
-            fill(255, 0, 255, 100);
+            fill(206, 20, 131, 100);
             rect(x, y, size, size);
-        }
+        } 
+        
     }
 
     // Method to check neighboring cells and return unvisited neighbors
@@ -124,9 +125,14 @@ function setup() {
 
     // Start maze generation from the first cell
     current = grid[0];
+    last = grid[grid.length - 1];
 
-    particle = new Particle(grid[0].i * size + size / 2, grid[0].j * size + size / 2);
 
+    // setting up the initialization of the particles 
+    for (var i = 0; i < noOfParticles; i++) {
+        let particle = new Particle();
+        particles.push(particle);
+    }
 }
 
 // Draw function to continuously update and display the grid
@@ -137,6 +143,15 @@ function draw() {
     for (var i = 0; i < grid.length; i++) {
         grid[i].show();
     }
+
+    for (var i = 0; i < particles.length; i++){
+        particles[i].show();
+        particles[i].move();
+        particles[i].handleCollision();
+    }
+    
+    
+  
 
     // Mark current cell as visited
     current.visited = true;
@@ -160,19 +175,55 @@ function draw() {
         // Pop a cell from the stack and make it the current cell
         current = stack.pop();
     }
-
-    particle.show();
 }
 
 class Particle {
-    constructor(x, y) {
-        this.x = x;
-        this.y = y; 
+    constructor() {
+        this.radius = 10;
+
+        // the ball will appear in the first cell, however, it will be random between 1 - 50 at what pixel it appears 
+        this.position = createVector(grid[0].i * size + random(size - 10), grid[0].j * size + random(size- 10)); // position of the particles, will always start with the first cell
+        this.velocity = p5.Vector.random2D(); // new 2D unit vector with a random heading.
     }
 
-    show() {
-        stroke(0);
-        fill(0, 255, 0);
-        ellipse(this.x, this.y, 10);
+    show() { // style of the ellipse
+        stroke(0, 150);
+        fill(112, 183, 126);
+        ellipse(this.position.x, this.position.y, this.radius);
+    }
+
+    move() {
+        this.position.add(this.velocity); // continuously adds the change in position to the position vector 
+    }
+
+    handleCollision() {
+        for (var gridElement = 0; gridElement < grid.length; gridElement++) {
+            var cell = grid[gridElement];
+            if (this.position.x > cell.i * size && this.position.x < (cell.i + 1) * size &&
+                this.position.y > cell.j * size && this.position.y < (cell.j + 1) * size) {
+                // Particle is inside the cell
+                if (cell.walls[0] && this.position.y - this.radius < cell.j * size) {
+                    // Top wall collision
+                    this.velocity.y *= -1; // Reverse the y velocity
+                    this.position.y = cell.j * size + this.radius; // Adjust position to prevent overlap
+                }
+                if (cell.walls[1] && this.position.x + this.radius > (cell.i + 1) * size) {
+                    // Right wall collision
+                    this.velocity.x *= -1; // Reverse the x velocity
+                    this.position.x = (cell.i + 1) * size - this.radius; // Adjust position to prevent overlap
+                }
+                if (cell.walls[2] && this.position.y + this.radius > (cell.j + 1) * size) {
+                    // Bottom wall collision
+                    this.velocity.y *= -1; // Reverse the y velocity
+                    this.position.y = (cell.j + 1) * size - this.radius; // Adjust position to prevent overlap
+                }
+                if (cell.walls[3] && this.position.x - this.radius < cell.i * size) {
+                    // Left wall collision
+                    this.velocity.x *= -1; // Reverse the x velocity
+                    this.position.x = cell.i * size + this.radius; // Adjust position to prevent overlap
+                }
+            }
+        }
+        
     }
 }
