@@ -16,7 +16,9 @@ let last;
 let stack = [];
 const particles = []; 
 const noOfParticles = 1000; 
-let newMazeButton;
+let newMazeButton, startButton, pauseButton, resetButton;
+let particleSlider, speedSlider;
+let startButtonPressed = false;
 
 // Function to calculate the index of a cell in the grid array
 function index(column, row) {
@@ -133,8 +135,29 @@ function setup() {
 
     // Create the "Generate New Maze" button
     newMazeButton = createButton('Generate New Maze');
-    newMazeButton.position(1200, 200);
+    newMazeButton.position(1150, 200);
     newMazeButton.elt.addEventListener('click', generateNewMaze);
+
+    // Create the "Start" button
+    startButton = createButton("Start the Maze");
+    startButton.position(1150, 250);
+    startButton.elt.addEventListener('click', startMaze);
+
+    // Create the "Pause" button
+    pauseButton = createButton("Pause the Maze");
+    pauseButton.position(1150, 300);
+    pauseButton.elt.addEventListener('click', pauseMaze);
+    pauseButton.attribute('disabled', true);
+
+    // Create the "Stop" button
+    resetButton = createButton("Reset the Maze");
+    resetButton.position(1150, 350);
+    resetButton.elt.addEventListener('click', resetMaze);
+    resetButton.attribute('disabled', true);
+
+    // Create the "Number of Particles" slider
+    particleSlider = createSlider(1, 1000, 100);
+    particleSlider.position(1450, 200);
 }
 
 // Draw function to continuously update and display the grid
@@ -148,10 +171,11 @@ function draw() {
 
     for (var i = 0; i < particles.length; i++){
         particles[i].show();
-        particles[i].move();
-        particles[i].handleCollision();
+        if (startButtonPressed) {
+            particles[i].move();
+            particles[i].handleCollision();
+        }
     }
-    // newMazeButton.mousePressed(generateNewMaze);
 }
 
 // function that generates the maze instantly instead of backtracking every cell, as seen previously
@@ -216,7 +240,39 @@ function generateNewMaze() {
         let particle = new Particle();
         particles.push(particle);
     }
-   
+}
+
+function startMaze() {
+    startButtonPressed = true;
+    startButton.attribute('disabled', true);
+
+    if (pauseButton.attribute('disabled')) {
+        pauseButton.removeAttribute('disabled');
+    }
+    if (resetButton.attribute('disabled')) {
+        resetButton.removeAttribute('disabled');
+    }
+}
+
+function pauseMaze() {
+    startButtonPressed = false;
+    startButton.removeAttribute('disabled');
+    pauseButton.attribute('disabled', true);
+}
+
+function resetMaze() {
+    if (startButtonPressed || pauseButton.attribute('disabled')) {
+        startButtonPressed = false;
+        startButton.removeAttribute('disabled');
+        particles.splice(0, particles.length); // Remove all particles
+        // creating new partciles
+        for (var i = 0; i < noOfParticles; i++) {
+            let particle = new Particle();
+            particles.push(particle);
+        }
+        resetButton.attribute('disabled', true);
+        pauseButton.attribute('disabled', true);
+    }
 }
 
 class Particle {
@@ -225,7 +281,7 @@ class Particle {
 
         // the ball will appear in the first cell, however, it will be random between 1 - 50 at what pixel it appears 
         this.position = createVector(grid[0].i * size + random(size - 10), grid[0].j * size + random(size- 10)); // position of the particles, will always start with the first cell
-        this.velocity = p5.Vector.random2D(); // new 2D unit vector with a random heading.
+        this.velocity = p5.Vector.random2D().mult(5); // new 2D unit vector with a random heading.
     }
 
     show() { // style of the ellipse
