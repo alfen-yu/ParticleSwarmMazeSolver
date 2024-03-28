@@ -16,6 +16,7 @@ let last;
 let stack = [];
 const particles = []; 
 const noOfParticles = 1000; 
+// buttons and sliders
 let newMazeButton, startButton, pauseButton, resetButton;
 let particleSlider, speedSlider;
 let startButtonPressed = false;
@@ -156,7 +157,8 @@ function setup() {
     resetButton.attribute('disabled', true);
 
     // Create the "Number of Particles" slider
-    particleSlider = createSlider(1, 1000, 100);
+    // paramters: min, max, initial value, step
+    particleSlider = createSlider(300, 10000, 1000, 50);
     particleSlider.position(1450, 200);
 }
 
@@ -169,6 +171,8 @@ function draw() {
         grid[i].show();
     }
 
+    // display the particles 
+    // if condition to check if start button is pressed
     for (var i = 0; i < particles.length; i++){
         particles[i].show();
         if (startButtonPressed) {
@@ -235,17 +239,19 @@ function generateNewMaze() {
 
     generateMaze();
     particles.splice(0, particles.length); // Remove all particles
-    // creating new partciles 
+
+    // creating new particles
     for (var i = 0; i < noOfParticles; i++) {
         let particle = new Particle();
         particles.push(particle);
     }
 }
 
+// Function to start the maze
 function startMaze() {
     startButtonPressed = true;
     startButton.attribute('disabled', true);
-
+    // disables stop and reset buttons 
     if (pauseButton.attribute('disabled')) {
         pauseButton.removeAttribute('disabled');
     }
@@ -254,22 +260,25 @@ function startMaze() {
     }
 }
 
+// Function to pause the maze
 function pauseMaze() {
     startButtonPressed = false;
     startButton.removeAttribute('disabled');
     pauseButton.attribute('disabled', true);
 }
 
+// Function to reset the maze
 function resetMaze() {
     if (startButtonPressed || pauseButton.attribute('disabled')) {
         startButtonPressed = false;
         startButton.removeAttribute('disabled');
-        particles.splice(0, particles.length); // Remove all particles
-        // creating new partciles
+        // removing previous and creating new particles
+        particles.splice(0, particles.length); 
         for (var i = 0; i < noOfParticles; i++) {
             let particle = new Particle();
             particles.push(particle);
         }
+        // disable the pause and reset buttons
         resetButton.attribute('disabled', true);
         pauseButton.attribute('disabled', true);
     }
