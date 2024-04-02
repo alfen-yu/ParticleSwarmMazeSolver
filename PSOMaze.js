@@ -15,11 +15,13 @@ let current;
 let last; 
 let stack = [];
 const particles = []; 
-const noOfParticles = 1000; 
+let noOfParticles = 1000; 
+let speed = 1;
 // buttons and sliders
 let newMazeButton, startButton, pauseButton, resetButton;
 let particleSlider, speedSlider;
 let startButtonPressed = false;
+let elapsedTime = "00:00:00";
 
 // Function to calculate the index of a cell in the grid array
 function index(column, row) {
@@ -115,8 +117,10 @@ function setup() {
     createCanvas(1000, 800);
     cols = floor(width / size);
     rows = floor(height / size);
-
+    
     frameRate(120);
+
+    document.getElementById("time-heading").textContent = "ELAPSED TIME: " + elapsedTime; 
 
     // Create cells and add them to the grid
     for (var row = 0; row < rows; row++) {
@@ -128,43 +132,80 @@ function setup() {
 
     generateMaze();
 
-    // setting up the initialization of the particles 
-    for (var i = 0; i < noOfParticles; i++) {
-        let particle = new Particle();
-        particles.push(particle);
-    }
-
+    
     // Create the "Generate New Maze" button
     newMazeButton = createButton('Generate New Maze');
     newMazeButton.position(1150, 200);
     newMazeButton.elt.addEventListener('click', generateNewMaze);
+    newMazeButton.style('background-color', '#4CAF50');
+    newMazeButton.style('padding', '10px 20px');
+    newMazeButton.style('font-size', '16px');
+    newMazeButton.style('border', 'none');
+    newMazeButton.style('border-radius', '5px');
 
     // Create the "Start" button
     startButton = createButton("Start the Maze");
     startButton.position(1150, 250);
     startButton.elt.addEventListener('click', startMaze);
+    startButton.style('background-color', '#4CAF50');
+    startButton.style('padding', '10px 20px');
+    startButton.style('font-size', '16px');
+    startButton.style('border', 'none');
+    startButton.style('border-radius', '5px');
 
     // Create the "Pause" button
     pauseButton = createButton("Pause the Maze");
     pauseButton.position(1150, 300);
     pauseButton.elt.addEventListener('click', pauseMaze);
     pauseButton.attribute('disabled', true);
+    pauseButton.style('background-color', '#4CAF50');
+    pauseButton.style('padding', '10px 20px');
+    pauseButton.style('font-size', '16px');
+    pauseButton.style('border', 'none');
+    pauseButton.style('border-radius', '5px');
 
     // Create the "Stop" button
     resetButton = createButton("Reset the Maze");
     resetButton.position(1150, 350);
     resetButton.elt.addEventListener('click', resetMaze);
     resetButton.attribute('disabled', true);
+    resetButton.style('background-color', '#4CAF50');
+    resetButton.style('padding', '10px 20px');
+    resetButton.style('font-size', '16px');
+    resetButton.style('border', 'none');
+    resetButton.style('border-radius', '5px');
 
-    // Create the "Number of Particles" slider
     // paramters: min, max, initial value, step
-    particleSlider = createSlider(300, 10000, 1000, 50);
+    // Create the "Number of Particles" slider
+    particleSlider = createSlider(300, 10000, noOfParticles, 50);
+    noOfParticles = particleSlider.value();
     particleSlider.position(1450, 200);
+    particleSlider.size(200);
+    // Function to create no of particles based on the slider value
+    particleSlider.input(() => {
+        noOfParticles = particleSlider.value();
+    });
+
+    // Create the "Speed" slider
+    speedSlider = createSlider(1, 10, speed, 1);
+    speed = speedSlider.value();
+    speedSlider.position(1450, 250);
+    speedSlider.size(200);
+    // function to change the speed of the particles based on the slider value
+    speedSlider.input(() => {
+        speed = speedSlider.value();
+    });
 }
+
 
 // Draw function to continuously update and display the grid
 function draw() {
     background(40);
+    
+    // Values of the Sliders
+    document.getElementById("particle-text").textContent = "Particles: " + particleSlider.value();
+    document.getElementById("speed-text").textContent = "Speed: " + speedSlider.value();
+
 
     // Display each cell in the grid
     for (var i = 0; i < grid.length; i++) {
@@ -180,6 +221,8 @@ function draw() {
             particles[i].handleCollision();
         }
     }
+
+    
 }
 
 // function that generates the maze instantly instead of backtracking every cell, as seen previously
@@ -229,6 +272,18 @@ function generateNewMaze() {
     stack = [];
     clear();
 
+    if (particleSlider.attribute('disabled')) {
+        particleSlider.removeAttribute('disabled');
+    }
+    if (speedSlider.attribute('disabled')) {
+        speedSlider.removeAttribute('disabled');
+    }
+    if (startButton.attribute('disabled')) {
+        startButton.removeAttribute('disabled');
+    }
+    pauseButton.attribute('disabled', true);
+    resetButton.attribute('disabled', true);
+
     // Create cells and add them to the grid
     for (var row = 0; row < rows; row++) {
         for (var column = 0; column < cols; column++) {
@@ -239,19 +294,25 @@ function generateNewMaze() {
 
     generateMaze();
     particles.splice(0, particles.length); // Remove all particles
-
-    // creating new particles
-    for (var i = 0; i < noOfParticles; i++) {
-        let particle = new Particle();
-        particles.push(particle);
-    }
 }
 
 // Function to start the maze
 function startMaze() {
+    // setting up the initialization of the particles 
+    for (var i = 0; i < noOfParticles; i++) {
+        let particle = new Particle();
+        particle.velocity.mult(speed);
+        particles.push(particle);
+    }
+
     startButtonPressed = true;
+
+    // disable all these buttons and sliders
     startButton.attribute('disabled', true);
-    // disables stop and reset buttons 
+    speedSlider.attribute('disabled', 'true'); 
+    particleSlider.attribute('disabled', 'true');
+
+    // enable stop and reset buttons
     if (pauseButton.attribute('disabled')) {
         pauseButton.removeAttribute('disabled');
     }
@@ -281,6 +342,9 @@ function resetMaze() {
         // disable the pause and reset buttons
         resetButton.attribute('disabled', true);
         pauseButton.attribute('disabled', true);
+        // enable the sliders
+        speedSlider.removeAttribute('disabled'); 
+        particleSlider.removeAttribute('disabled');
     }
 }
 
@@ -290,7 +354,7 @@ class Particle {
 
         // the ball will appear in the first cell, however, it will be random between 1 - 50 at what pixel it appears 
         this.position = createVector(grid[0].i * size + random(size - 10), grid[0].j * size + random(size- 10)); // position of the particles, will always start with the first cell
-        this.velocity = p5.Vector.random2D().mult(5); // new 2D unit vector with a random heading.
+        this.velocity = p5.Vector.random2D(); // new 2D unit vector with a random heading.
     }
 
     show() { // style of the ellipse
