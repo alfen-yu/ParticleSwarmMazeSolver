@@ -1,0 +1,207 @@
+\documentclass{article}
+
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{url} 
+\usepackage{xcolor}
+
+\title{Assignment 2 - Swarm Intelligence}
+\author{Muhammad Yousuf Uyghur}
+\date{}
+
+\lstdefinelanguage{JavaScript}{
+  keywords={typeof, new, true, false, catch, function, return, null, catch, switch, var, if, in, while, do, else, case, break},
+  keywordstyle=\color{blue}\bfseries,
+  ndkeywords={class, export, boolean, throw, implements, import, this},
+  ndkeywordstyle=\color{darkgray}\bfseries,
+  identifierstyle=\color{black},
+  sensitive=false,
+  comment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  commentstyle=\color{purple}\ttfamily,
+  stringstyle=\color{red}\ttfamily,
+  morestring=[b]',
+  morestring=[b]"
+}
+
+\lstset{
+   language=JavaScript,
+   backgroundcolor=\color{lightgray},
+   extendedchars=true,
+   basicstyle=\footnotesize\ttfamily,
+   showstringspaces=false,
+   showspaces=false,
+   numbers=left,
+   numberstyle=\footnotesize,
+   numbersep=9pt,
+   tabsize=2,
+   breaklines=true,
+   showtabs=false,
+   captionpos=b
+}
+
+\begin{document}
+
+\begin{titlepage}
+    \centering
+
+    \vspace{1cm}
+
+    \textbf{\large CS 451: Computational Intelligence}
+
+    \vspace{0.5cm}
+
+    \textbf{\large Spring 2024}
+
+    \vspace{1cm}
+    \includegraphics[width=0.5\textwidth]{snap.jpg}
+
+    \vfill
+
+    \textbf{\Large Dhanani School of Science and Engineering}
+
+    \vspace{0.5cm}
+
+    \textbf{\large Habib University}
+
+    \vfill
+
+\end{titlepage}
+
+\maketitle
+
+\section{Particle Systems}
+Particle systems are dynamic computational models that simulate the behavior of individual particles in virtual environments. These systems, inspired by natural phenomena like smoke, fire, and flocking behavior, are widely used in computer graphics and simulations.
+
+\section{Problem Formulation}
+In this report, we explore a particle system where each particle represents a ball navigating through a maze. The maze is depicted as a 2D grid with empty and blocked cells. Particles move through the grid, aiming to reach the maze's endpoint while avoiding obstacles. Through visualization, we gain insights into how particles interact and adapt to changes in the environment, offering opportunities for experimentation and exploration.
+
+\subsection{Algorithm Description}
+The Particle Systems algorithm can be described as follows:
+
+\subsubsection*{For Maze Generation}
+\begin{enumerate}
+    \item The Depth-First Search algorithm is implemented for maze generation using backtracking.
+    \item Given a current cell as a parameter.
+    \item Mark the current cell as visited.
+    \item While the current cell has any unvisited neighbour cells.
+    \item Choose one of the unvisited neighbours.
+    \item Remove the wall between the current cell and the chosen cell.
+    \item Invoke the routine recursively for the chosen cell.
+    \item Which is invoked once for any initial cell in the area.
+\end{enumerate}
+
+\subsubsection*{For Particle Systems}
+\begin{enumerate}
+    \item Initialize the environment, including the canvas or grid where the particles will be simulated.
+    \item Create the particles with initial positions, velocities, and other properties.
+    \item Update the position of each particle based on its velocity and any external forces acting on it.
+    \item Handle collisions with obstacles or boundaries.
+    \item Continuously update the simulation in a loop, allowing particles to move, interact, and be visualized.
+    \item Handle any termination conditions or stopping criteria.
+    \item Termination conditions in this case is if a particle reaches the last cell of the maze.
+    \item Observing the impact of parameter changes on particle behavior is essential for understanding the system's dynamics.
+\end{enumerate}
+
+\subsection{Implementation}
+To implement the Particle Systems and Maze Generation algorithm, I used JavaScript and its library P5js, which provides a simple and intuitive environment for visualizing the particles behavior. The code snippet below shows the main components of the implementation:
+
+\begin{lstlisting}[caption=Particle Systems and Maze Generation Implementation]
+// CONSTANTS 
+const CANVAS_WIDTH = 1000;
+const CANVAS_HEIGHT = 800;
+const PARTICLE_MIN = 300;
+const PARTICLE_MAX = 10000;
+const PARTICLE_STEP = 50;
+
+let noOfParticles;
+let speed;
+
+class Particle {
+    constructor() {
+        // Initialize particle position and velocity
+    }
+
+    show() {
+        // Display the particles on the canvas
+    }
+
+    move() {
+        // Adds velocity to position
+    }
+    handleCollision() {
+        // Collision detection with the walls 
+    }
+}
+
+function setup() {
+    // Initialize the canvas and create particles
+}
+
+function draw() {
+    // Update and display particles
+}
+
+function generateMaze() {
+    current = grid[0];
+    stack = [];
+    while (true) {
+        current.visited = true;
+        var next = current.checkNeighbours();
+        if (next) {
+            next.visited = true;
+            stack.push(current);
+            removeWall(current, next);
+            current = next;
+        }
+        else if (stack.length > 0) {
+            current = stack.pop();
+        }
+        else {
+            break;
+        }
+    }
+}
+\end{lstlisting}
+    
+
+\section{Simulation}
+The visualization of the Particle Systems is crucial for understanding and analyzing particle behavior. In our simulation, each particle is represented as a small entity on the canvas, typically depicted as a shape like a circle or a point. The position of each particle corresponds to its location within the simulated environment.
+
+\subsection{Simulation Control}
+Implementing controls for the simulation allows users to interact with and manipulate the environment. These controls typically include options for starting, pausing, resetting, or stopping the simulation. Providing feedback to the user regarding the simulation's status, elapsed time, and frame rate enhances and facilitates understanding.
+
+\subsection{Parameter Adjustment}
+One of the advantages of the simulation is the ability to adjust different parameters and observe their impact on the algorithm's execution and behavior. In our simulation, we allow the user to adjust the number of particles in the swarm (\texttt{noOfParticles}) using a slider. This parameter affects the exploration and exploitation capabilities of the swarm.
+Furthermore, we provide a speed control slider (\texttt{speed}) that allows the user to adjust the particle's speed, enabling fast or slow the swarm's movement and interactions.
+
+\subsection{Demonstration}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1\textwidth]{visual.png}
+    \caption{Visualization of Particle Systems}
+    \label{fig:visual}
+\end{figure}
+
+\subsection{Visualization Link}
+To visualize the particle system in action, you can visit the following link: \\
+\url{https://alfen-yu.github.io/ParticleSwarmMazeSolver/}
+
+\subsection{GitHub Repository}
+The source code for the particle system simulation is available on GitHub at the following repository: \\
+\url{https://github.com/alfen-yu/ParticleSwarmMazeSolver}
+
+\section{Future Plans}
+In the current implementation, the collision detection mechanism exhibits imperfections, resulting in particles leaking from corners or edges of walls. Despite efforts to address this issue, it persists as a challenge. Future plans include dedicating more resources to refining the collision detection algorithm to achieve more accurate and robust results. 
+Additionally, I plan to integrate Particle Swarm Optimization (PSO) with the existing particle systems framework. By leveraging PSO algorithms within the context of the maze environment, I aim to evaluate its efficacy in optimizing particle movements and navigating through the maze. This comparative study will shed light on the performance differences between the current particle systems approach and PSO-enhanced strategies, providing valuable insights.
+
+\section{Conclusion}
+In summary, exploring particle systems through this project has been insightful. By simulating particles navigating a maze, I've grasped the basics of their behavior in dynamic environments. While my focus was on basic particle movement and interaction, there's room for improvement. I aim to enhance collision detection and potentially integrate advanced optimization algorithms like PSO in future iterations. In conclusion, this project showcases the versatility of particle systems.
+\section{References}
+\begin{itemize}
+    \item p5.js. (n.d.). p5.js | home. Retrieved from \url{https://p5js.org/}
+    \item Wikipedia contributors. (2022, January 7). Maze generation algorithm. In Wikipedia, The Free Encyclopedia from \url{https://en.wikipedia.org/wiki/Maze_generation_algorithm#Randomized_depth-first_search}
+\end{itemize}
+
+
+\end{document}
